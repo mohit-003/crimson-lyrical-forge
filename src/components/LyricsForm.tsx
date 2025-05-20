@@ -20,6 +20,7 @@ const genres = [
 
 const LyricsForm = ({ onGenerateLyrics, isGenerating }: LyricsFormProps) => {
   const [topic, setTopic] = useState("");
+  const [songTitle, setSongTitle] = useState("");
   const [genre, setGenre] = useState("");
   const [complexity, setComplexity] = useState([50]);
   const [mood, setMood] = useState("");
@@ -28,6 +29,15 @@ const LyricsForm = ({ onGenerateLyrics, isGenerating }: LyricsFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!songTitle) {
+      toast({
+        title: "Song Title Required",
+        description: "Please enter a title for your song",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!topic) {
       toast({
         title: "Topic Required",
@@ -49,7 +59,7 @@ const LyricsForm = ({ onGenerateLyrics, isGenerating }: LyricsFormProps) => {
     // In a real app, we'd call an API here
     // For now, we'll generate mock lyrics
     setTimeout(() => {
-      const mockLyrics = generateMockLyrics(topic, genre, mood, complexity[0]);
+      const mockLyrics = generateMockLyrics(songTitle, topic, genre, mood, complexity[0]);
       onGenerateLyrics(mockLyrics);
     }, 2000);
   };
@@ -65,6 +75,19 @@ const LyricsForm = ({ onGenerateLyrics, isGenerating }: LyricsFormProps) => {
       </CardHeader>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label htmlFor="songTitle" className="block text-sm font-medium">
+              Song Title
+            </label>
+            <Input
+              id="songTitle"
+              value={songTitle}
+              onChange={(e) => setSongTitle(e.target.value)}
+              placeholder="Enter your song title..."
+              className="bg-secondary border-theme-red/20 focus:border-theme-red focus-visible:ring-theme-red"
+            />
+          </div>
+
           <div className="space-y-2">
             <label htmlFor="topic" className="block text-sm font-medium">
               Topic or Theme
@@ -140,8 +163,8 @@ const LyricsForm = ({ onGenerateLyrics, isGenerating }: LyricsFormProps) => {
   );
 };
 
-// Mock function to generate lyrics 
-const generateMockLyrics = (topic: string, genre: string, mood: string, complexity: number): string => {
+// Modified function to include song title
+const generateMockLyrics = (songTitle: string, topic: string, genre: string, mood: string, complexity: number): string => {
   const topics = {
     love: [
       "Your love is a symphony, playing notes on my heart",
@@ -172,7 +195,8 @@ const generateMockLyrics = (topic: string, genre: string, mood: string, complexi
   // More complex lyrics have more verses and structure
   const verseCount = Math.max(2, Math.floor(complexity / 25));
   
-  let lyrics = `[${genre.toUpperCase()} - ${mood ? mood.toUpperCase() + " VIBE" : "ANTHEM"}]\n\n`;
+  // Include song title in the lyrics header
+  let lyrics = `"${songTitle.toUpperCase()}" - [${genre.toUpperCase()} - ${mood ? mood.toUpperCase() + " VIBE" : "ANTHEM"}]\n\n`;
   lyrics += "VERSE 1:\n";
   
   for (let i = 0; i < verseCount; i++) {
@@ -183,9 +207,10 @@ const generateMockLyrics = (topic: string, genre: string, mood: string, complexi
     
     if (i === 0 || (complexity > 60 && i < verseCount - 1)) {
       lyrics += "CHORUS:\n";
-      lyrics += `${topic}, oh ${topic}\n`;
-      lyrics += `This feeling never ends\n`;
-      lyrics += `${topic}, my ${topic}\n`;
+      // Use song title in chorus
+      lyrics += `${songTitle}, oh ${songTitle}\n`;
+      lyrics += `This feeling called ${topic} never ends\n`;
+      lyrics += `${songTitle}, my ${songTitle}\n`;
       lyrics += `Where do we go from here?\n\n`;
     }
     
@@ -197,19 +222,20 @@ const generateMockLyrics = (topic: string, genre: string, mood: string, complexi
   if (complexity > 75) {
     lyrics += "BRIDGE:\n";
     lyrics += "Breaking through the silence\n";
-    lyrics += "Finding our way back home\n";
+    lyrics += `Finding our way in ${songTitle}\n`;
     lyrics += "Through the darkness and light\n";
     lyrics += "We're never alone\n\n";
     
     lyrics += "CHORUS:\n";
-    lyrics += `${topic}, oh ${topic}\n`;
-    lyrics += `This feeling never ends\n`;
-    lyrics += `${topic}, my ${topic}\n`;
+    lyrics += `${songTitle}, oh ${songTitle}\n`;
+    lyrics += `This feeling called ${topic} never ends\n`;
+    lyrics += `${songTitle}, my ${songTitle}\n`;
     lyrics += `Where do we go from here?\n\n`;
   }
   
   lyrics += "OUTRO:\n";
-  lyrics += verses[Math.floor(Math.random() * verses.length)];
+  lyrics += verses[Math.floor(Math.random() * verses.length)] + "\n";
+  lyrics += `${songTitle} - ${songTitle} - ${songTitle}`;
   
   return lyrics;
 };

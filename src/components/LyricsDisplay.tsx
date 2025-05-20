@@ -25,10 +25,14 @@ const LyricsDisplay = ({ lyrics }: LyricsDisplayProps) => {
   };
 
   const downloadLyrics = () => {
+    // Extract song title from lyrics to use as filename
+    const songTitleMatch = lyrics.match(/"([^"]+)"/);
+    const songTitle = songTitleMatch ? songTitleMatch[1].toLowerCase().replace(/\s+/g, '-') : 'lyrics';
+    
     const element = document.createElement("a");
     const file = new Blob([lyrics], { type: "text/plain" });
     element.href = URL.createObjectURL(file);
-    element.download = "lyrics.txt";
+    element.download = `${songTitle}.txt`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
@@ -40,15 +44,31 @@ const LyricsDisplay = ({ lyrics }: LyricsDisplayProps) => {
 
   // Function to format the lyrics with line breaks preserved
   const formatLyrics = () => {
-    return lyrics.split('\n').map((line, index) => (
-      <p 
-        key={index} 
-        className={`mb-1 ${line.includes('VERSE') || line.includes('CHORUS') || line.includes('BRIDGE') || line.includes('OUTRO') ? 
-          'font-bold text-theme-red mt-2' : ''}`}
-      >
-        {line || <br />}
-      </p>
-    ));
+    return lyrics.split('\n').map((line, index) => {
+      // Song title styling (assumes title is in quotes at the beginning)
+      if (index === 0 && line.includes('"')) {
+        const titleParts = line.split('"');
+        if (titleParts.length >= 3) {
+          return (
+            <p key={index} className="mb-1 font-bold text-xl">
+              <span className="text-theme-red">"{titleParts[1]}"</span>
+              <span>{titleParts[2]}</span>
+            </p>
+          );
+        }
+      }
+      
+      // Standard styling
+      return (
+        <p 
+          key={index} 
+          className={`mb-1 ${line.includes('VERSE') || line.includes('CHORUS') || line.includes('BRIDGE') || line.includes('OUTRO') ? 
+            'font-bold text-theme-red mt-2' : ''}`}
+        >
+          {line || <br />}
+        </p>
+      );
+    });
   };
 
   return (
